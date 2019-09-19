@@ -31,23 +31,23 @@ import picocli.CommandLine.*;
 
 /**
  * Subcommand the create a new, numbered Architecture Description Record (ADR).
- * 
+ *
  * @author adoble
  */
 
 @Command(name = "new",
          description = "Creates a new, numbered ADR.  The <title_text> arguments are concatenated to"
-         	      	+ " form the title of the new ADR. The ADR is opened for editing in the" 
-         	      	+ " editor specified by the VISUAL or EDITOR environment variable (VISUAL is " 
-         	      	+ "preferred; EDITOR is used if VISUAL is not set).  After editing, the " 
-         	      	+ "file name of the ADR is output to stdout, so the command can be used in " 
+         	      	+ " form the title of the new ADR. The ADR is opened for editing in the"
+         	      	+ " editor specified by the VISUAL or EDITOR environment variable (VISUAL is "
+         	      	+ "preferred; EDITOR is used if VISUAL is not set).  After editing, the "
+         	      	+ "file name of the ADR is output to stdout, so the command can be used in "
          	      	+ "scripts.")
 public class CommandNew implements Callable<Integer> {
 	// This stores the arguments making up the title text
-	@Parameters(arity = "1..*", paramLabel = "TITLETEXT", 
+	@Parameters(arity = "1..*", paramLabel = "TITLETEXT",
 			    description = "The TITLETEXT arguments are concatenated to form the title of the new ADR.")
 	List<String> adrTitleParts;
-	
+
     @Option(names = {"-l", "-link"}, description = "Links the new ADR to a previous ADR. "
     		+ " A specification of a link to another ADR is in the form \n"
     		+ "   <target_adr>:<link_description>:<reverse_link_description>\n\n"
@@ -64,12 +64,12 @@ public class CommandNew implements Callable<Integer> {
 			+ " it has been superseded by the new ADR."
 			+ " Multiple -s options can be given, so that the new ADR can supersede multiple existing ADRs")
 	ArrayList<Integer> supersedes = new ArrayList<Integer>();
-	
+
 	@ParentCommand
-	CommandADR commandADR; 
-		
+	CommandADR commandADR;
+
 	private Environment env;
-	
+
 	ADRProperties properties;
 
 
@@ -77,22 +77,20 @@ public class CommandNew implements Callable<Integer> {
 	@Override
 	public Integer call()  throws Exception {
 		String adrTitle;
-		int exitCode = 0; 
-		
+		int exitCode = 0;
+
 		env = commandADR.getEnvironment();
 
-	    
-		// Determine where the .adr directory is stored, i.e. the root path. 
+		// Determine where the .adr directory is stored, i.e. the root path.
 		// If the directory has not been initialized, this will throw an exception
 		Path rootPath = ADR.getRootPath(env);
-		
+
 		// Load the properties
 		properties = new ADRProperties(env);
-		properties.load(); 
+		properties.load();
 
-
-		// Determine where the ADRs are stored and 
-		// set up the record object 
+		// Determine where the ADRs are stored and
+		// set up the record object
 		Path docsPath = rootPath.resolve(properties.getProperty("docPath"));
 
 		// Check to see if the editor command has been set.
@@ -102,7 +100,7 @@ public class CommandNew implements Callable<Integer> {
 			env.err.println(msg);
 			exitCode =  ADR.ERRORENVIRONMENT;
 		}
-		
+
 		// Set up the template file
 		Path templatePath = null;
 		String templatePathName = properties.getProperty("templateFile");
@@ -111,14 +109,14 @@ public class CommandNew implements Callable<Integer> {
 		    templatePath = env.fileSystem.getPath(templatePathName);
 		    if (!Files.exists(templatePath)) {
 		    	String msg = "The project has been initialised with the template \'" +
-                              templatePathName + 
+                              templatePathName +
                              "\' which does not now exist.";
 		    	env.err.println("ERROR: " + msg);
 		    	throw new ADRException(msg);
 		    }
-		
-	    } 
-	    		
+
+	    }
+
 		// Create the ADR title from the arguments
 		adrTitle = adrTitleParts.stream().collect(Collectors.joining(" "));
 
@@ -131,7 +129,7 @@ public class CommandNew implements Callable<Integer> {
 				.build();
 
 		for (Integer supersedeId : supersedes) {
-			// Check that a ADR with the specified ID exists, i.e. there is an ADR 
+			// Check that a ADR with the specified ID exists, i.e. there is an ADR
 			// that can be superseded.
 			if (!checkADRExists(supersedeId)) {
 				String msg = "ADR to be superseded (ADR " + supersedeId + ") does not exist";
@@ -142,7 +140,7 @@ public class CommandNew implements Callable<Integer> {
 		}
 
 		//TODO check that record can handle multiple links
-		
+
 		try {
 			for (String link: links) {
 				int linkedToADRID = record.addLink(link);
@@ -152,17 +150,17 @@ public class CommandNew implements Callable<Integer> {
 					throw new ADRException("Linked to ADR (" + linkedToADRID + "), but this ADR does not exist");
 				}
 			}
-			
+
 		} catch (LinkSpecificationException e) {
 			String msg = "ERROR: -l parameter incorrectly formed.";
 			env.err.println(msg);   //TODO check that there is a test for this.
 			return CommandLine.ExitCode.USAGE;  // Ensure that the usage instruction are shown
 		}
 
-		
+
 		createADR(record);
-		
-		
+
+
 		return exitCode;
 	}
 
@@ -170,10 +168,10 @@ public class CommandNew implements Callable<Integer> {
 		// Get the doc path
 		Path rootPath = ADR.getRootPath(env);
 		Path docsPath = rootPath.resolve(properties.getProperty("docPath"));
-		
+
 		// Format the ADR ID
 		String formattedADRID = String.format("%04d", adrID);
-		
+
 		boolean found = false;
 		try (DirectoryStream<Path>  stream = Files.newDirectoryStream(docsPath)) {
 			for (Path entry: stream) {
@@ -183,18 +181,18 @@ public class CommandNew implements Callable<Integer> {
 				}
 			}
 		}
-	    
+
 		return found;
 	}
 
 	private void createADR(Record record) throws ADRException {
 		// The ADR file that is created
 		Path adrPath;
-		
+
 		env.out.println("Creating ADR");
 
 		adrPath = record.store();
-		
+
 		env.out.println("Created ADR at " + adrPath.toString());
 
 		// And now start up the editor using the specified runner

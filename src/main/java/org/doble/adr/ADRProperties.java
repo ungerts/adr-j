@@ -7,7 +7,7 @@ import java.io.BufferedReader;;
 
 public class ADRProperties extends Properties {
 
-	public static final String defaultDocPath = "doc/adr";  //TODO is this the right place for this constant?
+	public static final String defaultPathToAdrFiles = "doc/adr";  //TODO is this the right place for this constant?
 	public static final String defaultTemplateName = "default_template.md";
 	public static final String defaultInitialTemplateName = "default_initial_template.md";
 
@@ -35,7 +35,7 @@ public class ADRProperties extends Properties {
 
 		// Get the root directory by looking for an .adr directory
 
-		Path rootPath = env.dir;
+		Path rootPath = env.pathOfCallOfAdrTool;
 
 		Path propertiesRelPath = env.fileSystem.getPath(ADR.ADR_DIR_NAME, "adr.properties");
 
@@ -48,7 +48,7 @@ public class ADRProperties extends Properties {
 				propertiesReader.close();
 			} else {
 				// Set the default values. This should be stored when adr init is called,
-				setProperty("docPath", defaultDocPath);
+				setProperty("docPath", defaultPathToAdrFiles);
 			}
 		} catch (Exception e) {
 			throw new ADRException("FATAL: The properties file could not be read.", e);

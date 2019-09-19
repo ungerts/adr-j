@@ -48,7 +48,7 @@ public class EnvironmentTest {
 		assertEquals(env.err, System.err);
 		assertEquals(env.in, System.in);
 
-		Path p = env.dir;
+		Path p = env.pathOfCallOfAdrTool;
 		String pname = p.toString();
 		assertEquals(pname, ROOT_PATH);
 
