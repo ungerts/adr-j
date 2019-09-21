@@ -24,8 +24,8 @@ import picocli.CommandLine;
  */
 public class ADR {
 
-	final static public int MAX_ID_LENGTH = 4;
-	final static String ADR_DIR_NAME = ".adr";
+	public final static int MAX_ID_LENGTH = 4;
+	public final static String ADR_DIR_NAME = ".adr";
 
 	public static final Integer ERRORGENERAL = 1;  // General purpose error code
 	public static final Integer ERRORENVIRONMENT = 2;  // Environment variables not correctly set

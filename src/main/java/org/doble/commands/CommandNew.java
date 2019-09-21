@@ -48,7 +48,7 @@ public class CommandNew implements Callable<Integer> {
 			    description = "The TITLETEXT arguments are concatenated to form the title of the new ADR.")
 	List<String> adrTitleParts;
 
-    @Option(names = {"-l", "-link"}, description = "Links the new ADR to a previous ADR. "
+    @Option(names = {"-l", "--link"}, description = "Links the new ADR to a previous ADR. "
     		+ " A specification of a link to another ADR is in the form \n"
     		+ "   <target_adr>:<link_description>:<reverse_link_description>\n\n"
     		+ " <target_adr> is a reference (number or partial filename) of a previous decision."

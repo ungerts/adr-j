@@ -62,10 +62,7 @@ public class Environment {
 		this.pathOfCallOfAdrTool = builder.currentDirectory;
 		this.editorCommand = builder.editorCommand;
 		this.editorRunner = builder.editorRunner;
-
 	}
-
-
 
 	public static class Builder {
 		private FileSystem fileSystem;

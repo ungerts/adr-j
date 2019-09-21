@@ -8,10 +8,17 @@ and from version 4.0.0 this project adheres to [Semantic Versioning](https://sem
 ## [Unreleased]
 
 ### Added
-- Add version sub-command (currently gives version as 3.1.0). 
+
+- Add version sub-command (currently gives version as 3.1.0).
 - Picocli framework now as [external dependency](https://picocli.info/#_add_as_external_dependency)
 - Add enablement for future versions to use [GraalVM native images](https://www.graalvm.org/docs/reference-manual/aot-compilation/)
 - Add `CHANGELOG.md` following [keep a changelog](https://keepachangelog.com/en/1.0.0/).
+
+### Changed
+
+<!-- this is a breaking change, thus the next version has to be 4.0.0 -->
+- Change command line parameter names to be more conformant to existing tools: Long commands are always prefixed with `--`.
+  Example: `-template` is now `--template`
 
 ## [3.0] - 2019-06-29
 

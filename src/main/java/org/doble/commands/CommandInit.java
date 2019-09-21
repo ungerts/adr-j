@@ -1,6 +1,3 @@
-/**
- *
- */
 package org.doble.commands;
 
 import java.io.*;
@@ -29,10 +26,13 @@ import picocli.CommandLine.ParentCommand;
     	)
 public class CommandInit implements Callable<Integer> {
 
-	@Option(names = { "-t", "-template" }, paramLabel = "TEMPLATE", description = "Template file used for ADRs.")
+	@Option(names = {"--madr"}, description = "Default to MADR. Uses docs/adr as directory without writing any configuration files.")
+	private boolean madrFormat;
+
+	@Option(names = { "-t", "--template" }, paramLabel = "TEMPLATE", description = "Template file used for ADRs.")
     private String template;
 
-	@Option(names = { "-i", "-initial" }, paramLabel = "INITIALTEMPLATE",
+	@Option(names = { "-i", "--initial" }, paramLabel = "INITIALTEMPLATE",
 			description = "A template for the initial ADR created during intialization")
     private String initialTemplate;
 
@@ -44,19 +44,28 @@ public class CommandInit implements Callable<Integer> {
     @ParentCommand
     private CommandADR commandADR;
 
-	private Environment env;
-	private Properties properties;
+	public Integer initializeMADR() throws Exception {
+		Environment env = commandADR.getEnvironment();
+		Path adrPath = env.pathOfCallOfAdrTool.resolve(ADRProperties.secondaryPathToAdrFiles);
+		if (Files.exists(adrPath)) {
+			env.err.println("Directory is already initialised for ADR.");
+			return ADR.ERRORGENERAL;
+		}
 
+		Files.createDirectories(adrPath);
 
-	/* (non-Javadoc)
-	 * @see commands.Command#command(java.lang.String[])
-	 */
-	@Override
-	public Integer call() throws Exception {
+		Path madrDirectory = Paths.get("madr");
+		Files.copy(madrDirectory.resolve("0000-use-markdown-architectural-decision-records"), adrPath);
+		Files.copy(madrDirectory.resolve("template.md"), adrPath);
+
+		return 0;
+	}
+
+	public Integer initializeNonMADR() throws Exception {
 		int exitCode = 0;
 
-		this.env = commandADR.getEnvironment();
-		properties = new Properties();
+		Environment env = commandADR.getEnvironment();
+		Properties properties = new Properties();
 
 		if (env.editorCommand == null) {
 			String msg = "WARNING: Editor for the ADR has not been found in the environment variables.\n"
@@ -69,7 +78,7 @@ public class CommandInit implements Callable<Integer> {
 		if (template != null) properties.setProperty("templateFile", template.toString());
         if (initialTemplate != null) properties.setProperty("initialTemplateFile", initialTemplate.toString());
 
-		Path adrPath = env.pathOfCallOfAdrTool.resolve(".adr");
+		Path adrPath = env.pathOfCallOfAdrTool.resolve(ADR.ADR_DIR_NAME);
 
         // Check if the directory has already been initialized
 		if (Files.notExists(adrPath)) {
@@ -149,8 +158,19 @@ public class CommandInit implements Callable<Integer> {
 			exitCode = CommandLine.ExitCode.USAGE;
 		}
 
-
 		return exitCode;
+	}
+
+	/* (non-Javadoc)
+	 * @see commands.Command#command(java.lang.String[])
+	 */
+	@Override
+	public Integer call() throws Exception {
+		if (this.madrFormat) {
+			return this.initializeMADR();
+		} else {
+			return this.initializeNonMADR();
+		}
 	}
 
 }
