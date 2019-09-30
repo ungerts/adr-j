@@ -54,9 +54,12 @@ public class CommandInit implements Callable<Integer> {
 
 		Files.createDirectories(adrPath);
 
-		Path madrDirectory = Paths.get("madr");
-		Files.copy(madrDirectory.resolve("0000-use-markdown-architectural-decision-records"), adrPath);
-		Files.copy(madrDirectory.resolve("template.md"), adrPath);
+		try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResource("madr/0000-use-markdown-architectural-decision-records.md").openStream()) {
+			Files.copy(inputStream, adrPath.resolve("0000-use-markdown-architectural-decision-records.md"));
+		};
+		try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResource("madr/template.md").openStream()) {
+			Files.copy(inputStream, adrPath.resolve("template.md"));
+		};
 
 		return 0;
 	}
