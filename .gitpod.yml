@@ -9,3 +9,5 @@ tasks:
 vscode:
   extensions:
     - DavidAnson.vscode-markdownlint@0.30.2
+    - vscjava.vscode-java-debug@0.22.0:NbMLgD+1gkatW0tCiKIh2w==
+    - vscjava.vscode-java-dependency@0.5.1:Doag4kVXapWAYW+Sbnlw/A==

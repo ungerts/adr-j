@@ -11,6 +11,8 @@ USER root
 #
 # More information: https://www.gitpod.io/docs/42_config_docker/
 
+# See also https://www.gitpod.io/docs/java_in_gitpod/
+
 RUN bash -c ". /home/gitpod/.sdkman/bin/sdkman-init.sh \
              && sdk install java 8u222-b10 \
              && sdk default java 8u222-b10"

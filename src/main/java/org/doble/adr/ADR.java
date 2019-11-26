@@ -17,12 +17,17 @@ import org.doble.commands.*;
 
 import picocli.CommandLine;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Java version of the adr tool at https://github.com/npryce/adr-tools.
  *
  * @author adoble
  */
 public class ADR {
+
+    private static final Logger logger = LogManager.getLogger(ADR.class);
 
 	public final static int MAX_ID_LENGTH = 4;
 	public final static String ADR_DIR_NAME = ".adr";
@@ -104,13 +109,41 @@ public class ADR {
 		// ProviderMismatchExceptions later due to the filesystems that
 		// created the Path being different.
 
-		// The directory containing the .adr directory,
-		// i.e. the root of the project
-		Optional<Path> rootPath = Optional.empty();
-
 		// Find the root path, starting in the directory
 		// where the ADR tool has been run.
 		Path path = env.pathOfCallOfAdrTool;
+
+		Path adrPath;
+
+		// first guess: current directory
+		adrPath = path.resolve("0001-record-architecture-decisions.md");
+		if (Files.exists(adrPath)) {
+			return path.getParent().getParent();
+		}
+
+		// second guess: sub folder "adr"
+		adrPath = path.resolve("adr");
+		if (Files.exists(adrPath)) {
+			return adrPath.getParent();
+		}
+
+		// third guess: sub folder "doc/adr"
+		adrPath = path.resolve(ADRProperties.defaultPathToAdrFiles);
+		if (Files.exists(adrPath)) {
+			return path;
+		}
+
+		// fourth guess: sub folder "docs/adr"
+		adrPath = path.resolve(ADRProperties.secondaryPathToAdrFiles);
+		if (Files.exists(adrPath)) {
+			return path;
+		}
+
+		// no guessing works - we rely on the .adr directory
+
+		// The directory containing the .adr directory,
+		// i.e. the root of the project
+		Optional<Path> rootPath = Optional.empty();
 
 		Path adrFilePath;
 		while (path != null) {
@@ -135,4 +168,4 @@ public class ADR {
 		return rootPath.get();
 	}
 
-} // -- ADR
+}
