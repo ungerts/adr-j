@@ -16,7 +16,6 @@ public class EnvironmentTest {
 	private FileSystem fileSystem;
 	private final String ROOT_PATH = "/project/adr";
 	private Path rootPath;
-	private String editor = "C:/Users/adoble/AppData/Local/atom/bin/atom.cmd";
 	private EditorRunner runner = new TestEditorRunner();
 
 	@BeforeEach
@@ -34,6 +33,7 @@ public class EnvironmentTest {
 
 	@Test
 	public void testEnvironment() {
+		String editor = "C:/Users/adoble/AppData/Local/atom/bin/atom.cmd";
 		Environment env = new Environment.Builder(fileSystem)
 				.out(System.out)
 				.err(System.err)

@@ -4,10 +4,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,26 +44,26 @@ public class RecordTest {
 	@Test
 	@Order(1)
 	public void test1BasicRecordConstruction() throws Exception {
-		String expectedContents = "# 7. This is a new record\n" + 
-				"\n" + 
-				"Date: {{date}}\n" + 
-				"\n" + 
-				"## Status\n" + 
-				"\n" + 
-				"Proposed\n" + 
-				"\n\n" + 
-				"## Context\n" + 
-				"\n" + 
-				"Record the architectural decisions made on this project.\n" + 
-				"\n" + 
-				"## Decision\n" + 
-				"\n" + 
-				"We will use Architecture Decision Records, as described by Michael Nygard in this article: http://thinkrelevance.com/blog/2011/11/15/documenting-architecture-decisions\n" + 
-				"\n" + 
-				"## Consequences\n" + 
-				"\n" + 
+		String expectedContents = "# 7. This is a new record\n" +
+				"\n" +
+				"Date: {{date}}\n" +
+				"\n" +
+				"## Status\n" +
+				"\n" +
+				"Proposed\n" +
+				"\n\n" +
+				"## Context\n" +
+				"\n" +
+				"Record the architectural decisions made on this project.\n" +
+				"\n" +
+				"## Decision\n" +
+				"\n" +
+				"We will use Architecture Decision Records, as described by Michael Nygard in this article: http://thinkrelevance.com/blog/2011/11/15/documenting-architecture-decisions\n" +
+				"\n" +
+				"## Consequences\n" +
+				"\n" +
 				"See Michael Nygard's article, linked above.";
-		
+
 		expectedContents = expectedContents.replace("{{date}}", DateFormat.getDateInstance().format(new Date()));
 
 		// Build the record
@@ -93,29 +90,29 @@ public class RecordTest {
 	@Order(2)
 	public void test2ComplexRecordConstruction() throws Exception {
 		Date date = new Date();
-		
-		String expectedContents = "# 42. This is a complex record\n" + 
-				"\n" + 
-				"Date: {{date}}\n" + 
-				"\n" + 
-				"## Status\n" + 
-				"\n" + 
-				"Accepted\n" + 
-				"\n" + 
-				"\n" + 
-				"## Context\n" + 
-				"\n" + 
-				"Record the architectural decisions made on this project.\n" + 
-				"\n" + 
-				"## Decision\n" + 
-				"\n" + 
-				"We will use Architecture Decision Records, as described by Michael Nygard in this article: http://thinkrelevance.com/blog/2011/11/15/documenting-architecture-decisions\n" + 
-				"\n" + 
-				"## Consequences\n" + 
-				"\n" + 
+
+		String expectedContents = "# 42. This is a complex record\n" +
+				"\n" +
+				"Date: {{date}}\n" +
+				"\n" +
+				"## Status\n" +
+				"\n" +
+				"Accepted\n" +
+				"\n" +
+				"\n" +
+				"## Context\n" +
+				"\n" +
+				"Record the architectural decisions made on this project.\n" +
+				"\n" +
+				"## Decision\n" +
+				"\n" +
+				"We will use Architecture Decision Records, as described by Michael Nygard in this article: http://thinkrelevance.com/blog/2011/11/15/documenting-architecture-decisions\n" +
+				"\n" +
+				"## Consequences\n" +
+				"\n" +
 				"See Michael Nygard's article, linked above.";
 		expectedContents = expectedContents.replace("{{date}}", DateFormat.getDateInstance().format(date));
-		
+
 		Record record = new Record.Builder(docPath).id(42)
 				.name("This is a complex record")
 				.date(date)
@@ -131,7 +128,7 @@ public class RecordTest {
 		Stream<String> lines = Files.lines(adrFile);
 		String actualContents = lines.collect(Collectors.joining("\n"));
 		lines.close();
-	
+
 		assertEquals(expectedContents, actualContents);
 
 	}
@@ -147,16 +144,16 @@ public class RecordTest {
 		// Check if the ADR file has been created
 		assertTrue(Files.exists(fileSystem.getPath("/test/0008-cdr-is-stored-in-a-relational-database.md")));
 	}
-	
+
 	@Test
 	@Order(4)
 	public void testLinkConstruction() throws Exception {
 		Record record = new Record.Builder(docPath).id(102).name("Contains some links").build();
-        
+
 		// <target_adr>:<link_description>
 		record.addLink("4:Links to");
 		record.addLink("5:Also links to");
-				
+
 		record.store();
 
 	}

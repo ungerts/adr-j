@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.doble.commands;
 
@@ -15,7 +15,7 @@ import picocli.CommandLine.ParentCommand;
 
 /**
  * Subcommand to list the filenames of the currently created architecture decision records
- * 
+ *
  * @author adoble
  *
  */
@@ -25,12 +25,9 @@ import picocli.CommandLine.ParentCommand;
 public class CommandList implements Callable<Integer> {
 	@ParentCommand
 	CommandADR commandADR;
-	
-	private Environment env;
-	private ADRProperties properties; 
 
 	/**
-	 * 
+	 *
 	 */
 	public CommandList()  {
 
@@ -41,11 +38,11 @@ public class CommandList implements Callable<Integer> {
 	 */
 	@Override
 	public Integer call() {
-		
-		env = commandADR.getEnvironment();
-		
-		properties = new ADRProperties(env);
-					
+
+		Environment env = commandADR.getEnvironment();
+
+		ADRProperties properties = new ADRProperties(env);
+
 		// Load the properties
 		try {
 			properties.load();
@@ -53,7 +50,7 @@ public class CommandList implements Callable<Integer> {
 			env.err.println("FATAL: Cannot load properties file. Exception message ->" + e.getMessage() );
 			return ADR.ERRORGENERAL;
 		}
-		
+
 		Path rootPath;
 		try {
 			rootPath = ADR.getRootPath(env);
@@ -61,8 +58,8 @@ public class CommandList implements Callable<Integer> {
 			env.err.println("FATAL: Cannot determine project root directory. Exception message ->" + e.getMessage() );
 			return ADR.ERRORGENERAL;
 		}
-		
-		
+
+
 		Path docsPath = rootPath.resolve(properties.getProperty("docPath"));
 
 		try (Stream<Path> stream = Files.list(docsPath)){
@@ -72,7 +69,7 @@ public class CommandList implements Callable<Integer> {
 			return ADR.ERRORGENERAL;
 		}
 
-		        
+
 		return 0;
 	}
 

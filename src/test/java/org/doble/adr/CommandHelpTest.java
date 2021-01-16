@@ -18,13 +18,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 // Import a mock of the file systems
 
 /**
- * This tests the help subcommand. 
- * 
- * Note hat before the use of the picocli library, the help subcommand was implemented with 
+ * This tests the help subcommand.
+ *
+ * Note hat before the use of the picocli library, the help subcommand was implemented with
  * its own class and this JUnit class tested it. Decision was made to still run the test, but
- * on the picocli in-built help subcommand. 
- * 
- * 
+ * on the picocli in-built help subcommand.
+ *
+ *
  * @author adoble
  */
 public class CommandHelpTest {
@@ -32,13 +32,13 @@ public class CommandHelpTest {
 	private final String rootPath = "/project/adr";
 
 	@BeforeAll
-	public static void setUpBeforeClass() throws Exception {
+	public static void setUpBeforeClass() {
 		// Set up the mock file system
 		fileSystem = Jimfs.newFileSystem(Configuration.unix());
 	}
 
 	@Test
-	public void testHelp() throws Exception {
+	public void testHelp() {
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintStream ps = new PrintStream(baos);
@@ -55,7 +55,7 @@ public class CommandHelpTest {
 		ADR.run(args, env);
 
 		// read the output
-		String content = new String(baos.toByteArray());
+		String content = baos.toString();
 
 		assertTrue(content.length() > 0);
 
@@ -86,7 +86,7 @@ public class CommandHelpTest {
 		}
 
 		// read the output
-		String content = new String(baos.toByteArray());
+		String content = baos.toString();
 
 		assertTrue(content.length() > 0);
 

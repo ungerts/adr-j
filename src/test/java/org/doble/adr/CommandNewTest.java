@@ -1,12 +1,9 @@
 package org.doble.adr;
 
-import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,11 +15,9 @@ import picocli.CommandLine;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 //import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -31,7 +26,7 @@ public class CommandNewTest {
 	final static private String docsPath = "/doc/adr";
 	private static FileSystem fileSystem;
 	private Environment env;
-	
+
 	private String[] adrTitles = {"another test architecture decision",
 			"yet another test architecture decision",
 			"and still the adrs come",
@@ -42,7 +37,7 @@ public class CommandNewTest {
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		Path rootPath = null;
+		Path rootPath;
 
 		// Set up the mock file system
 		fileSystem = Jimfs.newFileSystem(Configuration.unix());
@@ -72,7 +67,7 @@ public class CommandNewTest {
 	}
 
 	@Test
-	public void testSimpleCommand() throws Exception {
+	public void testSimpleCommand() {
 		String adrTitle = "This is a test achitecture decision";
 
 		String[] args = TestUtilities.argify("new " + adrTitle);
@@ -88,27 +83,24 @@ public class CommandNewTest {
 	public void testWithoutTitle() {
 		String[] args = {"new"};
 		int exitCode = ADR.run(args,  env);
-		
-		assertTrue(exitCode == CommandLine.ExitCode.USAGE);  // Usage exit code
+
+		assertEquals(CommandLine.ExitCode.USAGE, exitCode);  // Usage exit code
 	}
 
 	@Test
 	public void testManyADRs() throws Exception {
 
 		// Create a set of test paths, paths of files that should be have been created
-		ArrayList<Path> expectedFiles = new ArrayList<Path>();
-		ArrayList<String> expectedFileNames = new ArrayList<String>();
+		ArrayList<String> expectedFileNames = new ArrayList<>();
 
 		for (int id = 0; id < adrTitles.length; id++) {
 			String name = TestUtilities.adrFileName(id + 2, adrTitles[id]);
 			Path path = fileSystem.getPath(rootPathName, docsPath, name);
-			expectedFiles.add(path);
 			expectedFileNames.add(path.toString());
 		}
 
 		// And now add on the ADR created during initialization
 		Path initADR = fileSystem.getPath(rootPathName, docsPath, "0001-record-architecture-decisions.md");
-		expectedFiles.add(initADR);
 		expectedFileNames.add(initADR.toString());
 
 		for (String adrName : adrTitles) {
@@ -117,7 +109,7 @@ public class CommandNewTest {
 			ADR.run(args, env);
 		}
 
-		// Check to see if the names exist 
+		// Check to see if the names exist
 		Path docsDir = fileSystem.getPath(rootPathName, docsPath);
 
 		Stream<String> actualFileNamesStream = Files.list(docsDir).map(Path::toString);
@@ -126,6 +118,6 @@ public class CommandNewTest {
 		assertTrue(actualFileNames.containsAll(expectedFileNames), "File(s) missing");
 		assertTrue(expectedFileNames.containsAll(actualFileNames), "Unexpected file(s) found");
 	}
-	
+
 
 }

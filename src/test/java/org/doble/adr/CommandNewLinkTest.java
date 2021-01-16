@@ -31,7 +31,7 @@ public class CommandNewLinkTest {
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		Path rootPath = null;
+		Path rootPath;
 
 		// Set up the mock file system
 		fileSystem = Jimfs.newFileSystem(Configuration.unix());
@@ -53,9 +53,9 @@ public class CommandNewLinkTest {
 		// Initialize up the directory structure
 		String[] args = {"init"};
 		int exitCode = ADR.run(args, env);
-		
-		assertTrue(exitCode == 0); // Successful initialization
-		
+
+        assertEquals(exitCode, 0); // Successful initialization
+
 	}
 
 	@AfterEach
@@ -63,8 +63,8 @@ public class CommandNewLinkTest {
 		fileSystem.close();
 	}
 
-	/** 
-	 * Create some valid links to ADRs and check if they are added. 
+	/**
+	 * Create some valid links to ADRs and check if they are added.
 	 * @throws Exception
 	 */
 	@Test
@@ -82,7 +82,7 @@ public class CommandNewLinkTest {
 
 		// Now check if the link messages has been added to the new ADR 7
 		Path newADRFile = fileSystem.getPath(rootPathName, docsPath, "0007-links-to-number-4.md");
-        
+
 		assertTrue(TestUtilities.contains("Links to [ADR 4](0004-this-adr-is-going-to-be-linked-to.md)", newADRFile));
 
 	}
@@ -97,23 +97,23 @@ public class CommandNewLinkTest {
 		int exitCode = ADR.run(TestUtilities.argify("new -l Links to number 4"), env);
 		assertEquals(exitCode, CommandLine.ExitCode.USAGE);
 	}
-	
+
 	/**
 	 * Create a link to an ADR that does not exists and see if it is detected
-	 * 
+	 *
 	 */
-	@Test 
-	@Order(3) 
+	@Test
+	@Order(3)
 	public void testNonexistingLink() {
-		
-		assertEquals(ADR.run(TestUtilities.argify("new -l 42:\"Links to nowhere\" Links should be valid"), env), 
+
+		assertEquals(ADR.run(TestUtilities.argify("new -l 42:\"Links to nowhere\" Links should be valid"), env),
 				    CommandLine.ExitCode.SOFTWARE);
-		
-		
+
+
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 }

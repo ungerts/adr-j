@@ -7,12 +7,12 @@ import org.doble.adr.Environment;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
 
-/** 
+/**
  * This class represents the main command "adr". It is:
  *  - required for the Picocli framework
- *  - contains the command declarations 
+ *  - contains the command declarations
  *  - maintains the environment for subcommands
- *  
+ *
  * @author adoble
  *
  */
@@ -25,7 +25,7 @@ import picocli.CommandLine.HelpCommand;
 				 				 "64:Invalid input: an unknown option or invalid parameter was specified.",
 				                 "70:Execution exception: an exception occurred while executing the business logic."
 		 },
-		 subcommands = {CommandInit.class, 
+		 subcommands = {CommandInit.class,
 		         		CommandNew.class,
 				        CommandList.class,
 				        CommandVersion.class,
@@ -33,22 +33,22 @@ import picocli.CommandLine.HelpCommand;
 				       }
 		)
 public class CommandADR implements Callable<Integer> {
-	
+
 	Environment env;
-	
-     
+
+
 	public CommandADR(Environment env) {
 		super();
 		this.env = env;
 	}
-	
+
 	public Environment getEnvironment() {
 		return env;
 	}
 
 
 	@Override
-	public Integer call() throws Exception {
+	public Integer call() {
 		return 0;
 	}
 

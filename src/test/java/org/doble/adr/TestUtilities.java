@@ -34,8 +34,8 @@ public class TestUtilities {
 	 * Generate an argument array from a string
 	 */
 	public static String[] argify(String s) {
-		ArrayList<String> args = new ArrayList<String>(Arrays.asList(s.split(" ")));
-		ArrayList<String> finalArgs = new ArrayList<String>();
+		ArrayList<String> args = new ArrayList<>(Arrays.asList(s.split(" ")));
+		ArrayList<String> finalArgs = new ArrayList<>();
 
 		// Check if any args have quotes and pack them together
 		String packedArg = "";
@@ -70,7 +70,7 @@ public class TestUtilities {
 	 * Generate the file name of an ADR
 	 */
 	public static String adrFileName(String idstr, String title) {
-		int id = new Integer(idstr).intValue();
+		int id = Integer.parseInt(idstr);
 
 		return adrFileName(id, title);
 	}
@@ -91,9 +91,9 @@ public class TestUtilities {
 		count = Files.lines(file).filter(s -> s.contains(lookFor)).count();
 		return count;
 	}
-	
+
 	/**
-	 * Print a two multi-line string each line after the other for comparison 
+	 * Print a two multi-line string each line after the other for comparison
 	 * @param expectedContents
 	 * @param actualContents
 	 */
@@ -107,36 +107,36 @@ public class TestUtilities {
 		for (int i = 0; i < ex.size(); i++) {
 			System.out.println(">"+ ex.get(i));
 			System.out.println("<"+ ac.get(i));
-			
+
 		}
 	}
-	
+
 	/**
 	 * Print out the contents of the specified file.
 	 * @param path The file to print out
 	 */
 	public static void printFile(Path path) {
-		
+
 		try (Stream<String> lines= Files.lines(path)) {
-		
+
 	        String contents = lines.collect(Collectors.joining("\n"));
 	        System.out.print(contents);
-	    
+
 		} catch (IOException e) {
 			System.err.println("Unable to read print file " + path.toString());
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Create a (mock) template file based on the specified content
 	 * @param fileSystem              The file system hosting the files
 	 * @param initTemplateFileName    The full path name of the mock template file
-	 * @param initTemplateFileContent Contents of the mock template 
+	 * @param initTemplateFileContent Contents of the mock template
 	 */
 	public static void createTemplateFile(FileSystem fileSystem, String templateFileName, String templateContent) {
-		
-		Path templateFile = fileSystem.getPath(templateFileName);   
+
+		Path templateFile = fileSystem.getPath(templateFileName);
 		Path templateDirectory = templateFile.getParent();
 		try {
 			Files.createDirectories(templateDirectory);

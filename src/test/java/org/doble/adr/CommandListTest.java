@@ -24,7 +24,7 @@ public class CommandListTest {
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		Path rootPath = null;
+		Path rootPath;
 
 		// Set up the mock file system
 		fileSystem = Jimfs.newFileSystem(Configuration.unix());
@@ -46,7 +46,7 @@ public class CommandListTest {
 		// Initialize up the directory structure
 		String[] args = {"init"};
 		int exitCode = ADR.run(args, env);
-		assertEquals(exitCode,  0); 
+		assertEquals(exitCode,  0);
 	}
 
 	@AfterEach
@@ -55,7 +55,7 @@ public class CommandListTest {
 	}
 
 	@Test
-	public void testList() throws Exception {
+	public void testList() {
 
 		String[] testData = {
 				"new An ADR",
@@ -66,11 +66,11 @@ public class CommandListTest {
 		};
 
 		// Create some ADRs
-		for (int i = 0; i < testData.length; i++) {
-			assertEquals(ADR.run(TestUtilities.argify(testData[i]), env), 0);;
+		for (String testDatum : testData) {
+			assertEquals(ADR.run(TestUtilities.argify(testDatum), env), 0);
 		}
 
-		//Catch the output 
+		//Catch the output
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintStream testOut = new PrintStream(baos);
 		Environment localEnv = new Environment.Builder(fileSystem)
@@ -93,7 +93,7 @@ public class CommandListTest {
 				"0006-decisions-decisions-decisions.md"
 		};
 
-		String list = new String(baos.toByteArray());
+		String list = baos.toString();
 		for (String expected : expectedFiles) {
 			assertTrue(list.contains(expected));
 		}

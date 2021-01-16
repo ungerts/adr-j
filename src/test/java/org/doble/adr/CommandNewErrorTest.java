@@ -18,13 +18,12 @@ public class CommandNewErrorTest {
 	final static private String docsPath = "/doc/adr";
 	private static FileSystem fileSystem;
 	private static Environment env;
-	
+
 	private static ByteArrayOutputStream errorBAOS;
-	private static PrintStream errorPrintStream;
-	
+
 	@BeforeEach
 	public void setUp() throws Exception {
-		Path rootPath = null;
+		Path rootPath;
 
 		// Set up the mock file system
 		fileSystem = Jimfs.newFileSystem(Configuration.unix());
@@ -32,10 +31,10 @@ public class CommandNewErrorTest {
 		rootPath = fileSystem.getPath("/project");
 
 		Files.createDirectory(rootPath);
-		
+
 		// Redirect error message to a stream
 		errorBAOS = new ByteArrayOutputStream();
-		errorPrintStream = new PrintStream(errorBAOS);
+		PrintStream errorPrintStream = new PrintStream(errorBAOS);
 
 		env = new Environment.Builder(fileSystem)
 				.out(System.out)
@@ -46,28 +45,28 @@ public class CommandNewErrorTest {
 				.editorRunner(new TestEditorRunner())
 				.build();
 
-	
+
 	}
-	
+
 	@AfterEach
 	public void tearDown() throws Exception {
 		fileSystem.close();
 	}
-	
-	@Test 
+
+	@Test
 	public void testNoInit() {
 		String adrTitle = "Trying to create an ADR without previous init";
 
 		String[] args = TestUtilities.argify("new " + adrTitle);
 
 		int exitCode = ADR.run(args, env);
-		
+
 		// Usage error
-		//assertEquals(64, exitCode);   
-		assertEquals(1, exitCode);   
-		
+		//assertEquals(64, exitCode);
+		assertEquals(1, exitCode);
+
 		// Now check if a message has been given
-		String commandErrorOutput = new String(errorBAOS.toByteArray());
+		String commandErrorOutput = errorBAOS.toString();
         assertTrue(commandErrorOutput.contains("ERROR"));
 	}
 }

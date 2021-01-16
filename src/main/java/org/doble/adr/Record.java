@@ -1,35 +1,30 @@
 package org.doble.adr;
 
 import java.io.*;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.*;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Record {
 	private final Path docsPath;              // Where the adr files are stored
-	private final Optional<String> template;  //Using String type instead of Path as the default template is a resource. 
-	                                          //Resources are not correctly supported by Path. 
-	private final String templateExtension;;
+	private final Optional<String> template;  //Using String type instead of Path as the default template is a resource.
+	                                          //Resources are not correctly supported by Path.
+	private final String templateExtension;
 	private final Integer id;
 	private final String idFormatted;
 	private final String name;
 	private final Date date;
 	private final String status;
 
-	private ArrayList<Integer> supersedes = new ArrayList<Integer>();
+	private ArrayList<Integer> supersedes = new ArrayList<>();
 
-	private class Link {
+	private static class Link {
 
 		Link(Integer id, String comment) {
 			this.id = id;
@@ -37,17 +32,17 @@ public class Record {
 		}
 
 		Integer id;
-		String comment = "";
+		String comment;
 	}
-	
-	private ArrayList<Link> links = new ArrayList<Link>();
+
+	private ArrayList<Link> links = new ArrayList<>();
 
 
 	/**
 	 * Constructor for an ADR record. It has private scope so that only
 	 * the builder can be used to construct it.
 	 */
-	private Record(Record.Builder builder) throws URISyntaxException {
+	private Record(Record.Builder builder) {
 		//final String defaultTemplateName = ADRProperties.defaultTemplateName;
 		this.docsPath = builder.docsPath;
 		//this.template = builder.template;
@@ -56,7 +51,7 @@ public class Record {
 		this.name = builder.name;
 		this.date = builder.date;
 		this.status = builder.status;
-		
+
 		if (builder.template.isPresent()) {
 			this.template = builder.template;
 			this.templateExtension = builder.templateExtension;
@@ -64,18 +59,18 @@ public class Record {
 			this.template = Optional.empty();
 			this.templateExtension = "md";
 		}
-	
+
 	}
 
 	/**
-	 * Generate and store an ADR using the data stored in this record. 
-	 * Generate a file with a name of the form: 
+	 * Generate and store an ADR using the data stored in this record.
+	 * Generate a file with a name of the form:
 	 *    (adr id)-(adr name, lower case separated with hyphens).(the extension of the template file used)   //TODO extension
 	 *
 	 * @return Path The generated ADR file.
 	 */
 	public Path store() throws ADRException {
-	
+
 		// Create a file name for the ADR
 		String targetFileName = this.name.toLowerCase();
 		targetFileName = targetFileName.replace(' ', '-');    // Replace blanks with hyphens
@@ -83,37 +78,37 @@ public class Record {
 		targetFileName = idFormatted + '-' + targetFileName + "." + templateExtension;  // Compose full file name
 		//Path p = env.fileSystem.getPath(docsPath.toString(), fileName);
 		Path targetFile = docsPath.resolve(targetFileName); // Full path of the ADR file in the document path
-		
-		
+
+
 		// Create the link fragment using the line in the template file
 		Optional<String> templateLinkFragment = getFragment("{{{link.id}}}");
 
 		//Now generate link fragments (i.e. the markdown and the template field) for each of the links
-		ArrayList<String> linkFragments = new ArrayList<String>();
+		ArrayList<String> linkFragments = new ArrayList<>();
 		String linkSectionString;
 		if (templateLinkFragment.isPresent()) {
 			for (Link link: links) {
 				String linkFragment = templateLinkFragment.get();
-				linkFragments.add(linkFragment.replace("{{{link.comment}}}", 
+				linkFragments.add(linkFragment.replace("{{{link.comment}}}",
 						capitalizeFirstCharacter(link.comment))
 						.replace("{{{link.id}}}", link.id.toString())
 						.replace("{{{link.file}}}", getADRFileName(link.id))
 						);
 			}
-			linkSectionString = linkFragments.stream().collect(Collectors.joining("\n"));
+			linkSectionString = String.join("\n", linkFragments);
 		} else {
 			linkSectionString = "";
 		}
 
-		
+
 		// Create the superseded fragment using the line in the template file
 		Optional<String> templateSupersededFragment;
 		String supersededSectionString;
-		ArrayList<String> supersededFragments = new ArrayList<String>();
+		ArrayList<String> supersededFragments = new ArrayList<>();
 
 		templateSupersededFragment = getFragment("{{{superseded.id}}}");
-       
-		// Now generate superseded string fragments 
+
+		// Now generate superseded string fragments
 		if (templateSupersededFragment.isPresent()) {
 			for (Integer supersededId: supersedes) {
 				String supersededFragment = templateSupersededFragment.get();
@@ -121,15 +116,15 @@ public class Record {
 						.replace("{{{superseded.file}}}", getADRFileName(supersededId))
 						);
 			}
-			supersededSectionString = supersededFragments.stream().collect(Collectors.joining("\n"));
+			supersededSectionString = String.join("\n", supersededFragments);
 		} else {
 			supersededSectionString = "";
 		}
-		
+
 		// Now substitute the fields in the template and write to the ADR
 		TemplateProvider templateProvider = new TemplateProvider(docsPath.getFileSystem(), ADRProperties.defaultTemplateName);
-		List<String> targetContent = new ArrayList<String>();
-		
+		List<String> targetContent;
+
 		try (Stream<String> lines = Files.lines(templateProvider.getPath(this.template))) {
 			targetContent = lines
 					.map(line -> line.replaceAll("\\{\\{id\\}\\}", id.toString()))
@@ -138,11 +133,11 @@ public class Record {
 					.map(line -> line.replaceAll("\\{\\{date\\}\\}", DateFormat.getDateInstance().format(date)))
 					.filter(line -> !(line.contains("{{{link.id}}}") && linkFragments.size() == 0))        // Remove lines which will be blank
 					.filter(line -> !(line.contains("{{{superseded.id}}}") && supersededFragments.size() == 0)) // Remove lines which will be blank
-					.map(line -> line.contains("{{{link.id}}}")?linkSectionString: line)   
+					.map(line -> line.contains("{{{link.id}}}")?linkSectionString: line)
 					.map(line -> line.contains("{{{superseded.id}}}")?supersededSectionString: line)
-					.collect(Collectors.toList());   
+					.collect(Collectors.toList());
 			//targetContent.removeIf(item -> item.isEmpty());  // Remove double empty lines
-			Files.write(targetFile, targetContent);  
+			Files.write(targetFile, targetContent);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 		   throw new ADRException("Cannot write ADR", e.getCause());
@@ -171,7 +166,7 @@ public class Record {
 		return fileName;
 	}
 
-	
+
 
 	/**
 	 * Writes the ADR (status section) with id supersededID that it has been
@@ -182,7 +177,7 @@ public class Record {
 	 *
 	 * @param supersededID The id of the superseded ADR.
 	 * @param supersedesID The id of the ADR that supersedes it.
-	 * TODO REMOVE as this is now not used. 
+	 * TODO REMOVE as this is now not used.
 	 */
 	private void supersede(Path docsPath, int supersededID, int supersedesID) throws ADRException {
 		Path supersededADRFile;
@@ -190,7 +185,7 @@ public class Record {
 
 		// Get the ADR file that is to be superseded
 		try (Stream<Path> stream = Files.list(docsPath)) {
-			paths = stream.filter(ADRFilter.filter((int) supersededID)).toArray(Path[]::new);
+			paths = stream.filter(ADRFilter.filter(supersededID)).toArray(Path[]::new);
 
 			if (paths.length == 1) {
 				supersededADRFile = paths[0];
@@ -248,7 +243,7 @@ public class Record {
 			if (linkSpec.length() > 0) {
 				String[] linkSpecs = linkSpec.split(":");
 				if (linkSpecs.length == 2) {
-					linkID = new Integer(linkSpecs[0]);
+					linkID = Integer.parseInt(linkSpecs[0]);
 					linkComment = linkSpecs[1];
 					links.add(new Link(linkID, linkComment));
 				} else {
@@ -268,41 +263,41 @@ public class Record {
 	 * @param adrId The id of the ADR superseded by this ADR.
 	 */
 	public void addSupersedes(int adrId) {
-		supersedes.add(new Integer(adrId));
+		supersedes.add(adrId);
 	}
 
 	private String capitalizeFirstCharacter(String s) {
 		return s.substring(0, 1).toUpperCase() + s.substring(1);
 	}
-	
+
 	/**
 	 * Finds and returns the line in the template that contains the specified substitution field.
 	 * Assumes that all the other substitution field for the link are on the same line.
 	 * TODO make sure that the above is in the documentation
 	 * @param substitutionField The substitutionField being looked for
-	 * @returns Optional<String) The fragment found. Optional.empty if no fragment found 
+	 * @returns Optional<String) The fragment found. Optional.empty if no fragment found
 	 * (e.g. if the substitution field has not been specified in the template).
 	 */
 	private Optional<String> getFragment(String substitutionField) throws ADRException {
-		String templateFragment; 
-		
+		String templateFragment;
+
 		TemplateProvider templateProvider = new TemplateProvider(docsPath.getFileSystem(), ADRProperties.defaultTemplateName);
-		
+
 		//BufferedReader reader = getTemplateReader();
 		try {
 			Path templatePath = templateProvider.getPath(this.template);
 			Stream<String> templateLines = Files.lines(templatePath);
 			templateFragment = templateLines.filter(line-> line.contains(substitutionField)).findAny().orElse(null);
 			templateLines.close();
-		} 
+		}
 		catch (Exception e) {
 			String msg = "Cannot get the template containing " + substitutionField;
 			throw new ADRException(msg, e);
 		}
-		
+
 		return Optional.ofNullable(templateFragment);
 	}
-	
+
 	private Optional<String> getTemplate() {
 		return template;
 	}
@@ -322,10 +317,10 @@ public class Record {
 		public Builder(Path docsPath) {
 			this.docsPath = docsPath;
 		}
-      
 
-		/** 
-		 * Sets up the path name of the template. Templates can be 
+
+		/**
+		 * Sets up the path name of the template. Templates can be
 		 * a) normal files.  In which case the string is a normal path specification
 		 * b) resources. In which case the string is preceded with "rsrc:"
 		 * @param template Path name of the template
@@ -335,7 +330,7 @@ public class Record {
 			this.template = Optional.ofNullable(template);
 			if (this.template.isPresent()) {
 				// Get the file extension
-				String fileName = this.template.get().toString();
+				String fileName = this.template.get();
 				this.templateExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
 			} else {
 				this.templateExtension = "md";
@@ -364,7 +359,7 @@ public class Record {
 			return this;
 		}
 
-		public Record build() throws URISyntaxException {
+		public Record build() {
 			return new Record(this);
 		}
 	}

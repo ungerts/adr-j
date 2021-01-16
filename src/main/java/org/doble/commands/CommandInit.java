@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.doble.commands;
 
@@ -14,7 +14,6 @@ import org.doble.adr.*;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ParentCommand;
 
 /**
@@ -28,46 +27,40 @@ import picocli.CommandLine.ParentCommand;
      			       "   record architectural decisions with ADRs."
     	)
 public class CommandInit implements Callable<Integer> {
-	
+
 	@Option(names = { "-t", "-template" }, paramLabel = "TEMPLATE", description = "Template file used for ADRs.")
     private String template;
-	
-	@Option(names = { "-i", "-initial" }, paramLabel = "INITIALTEMPLATE", 
+
+	@Option(names = { "-i", "-initial" }, paramLabel = "INITIALTEMPLATE",
 			description = "A template for the initial ADR created during intialization")
     private String initialTemplate;
 
-    @Parameters(arity = "0..1", paramLabel = "DOCDIR", description = "The directory to store the ADRs relative to " 
-    		                                                         + " the current directory."
-    		                                                         + " Default is ${DEFAULT-VALUE}.")
-    private String docPath = ADRProperties.defaultDocPath;  //TODO change this to type path
-    
-    @ParentCommand
+	@ParentCommand
     private CommandADR commandADR;
-	
-	private Environment env;
-	private Properties properties;
-	
+
 
 	/* (non-Javadoc)
 	 * @see commands.Command#command(java.lang.String[])
 	 */
 	@Override
 	public Integer call() throws Exception {
-		int exitCode = 0; 
+		int exitCode = 0;
 
-		this.env = commandADR.getEnvironment();
-		properties = new Properties();
-		
+		Environment env = commandADR.getEnvironment();
+		Properties properties = new Properties();
+
 		if (env.editorCommand == null) {
 			String msg = "WARNING: Editor for the ADR has not been found in the environment variables.\n"
 					+ "Have you set the environment variable EDITOR or VISUAL with the editor program you want to use?\n";
 			env.err.println(msg);
 			exitCode = ADR.ERRORENVIRONMENT;
-		} 
+		}
 
-		properties.setProperty("docPath", docPath); 
-		if (template != null) properties.setProperty("templateFile", template.toString());
-        if (initialTemplate != null) properties.setProperty("initialTemplateFile", initialTemplate.toString());
+		//TODO change this to type path
+		String docPath = ADRProperties.defaultDocPath;
+		properties.setProperty("docPath", docPath);
+		if (template != null) properties.setProperty("templateFile", template);
+        if (initialTemplate != null) properties.setProperty("initialTemplateFile", initialTemplate);
 
 		Path adrPath = env.dir.resolve(".adr");
 
@@ -78,7 +71,7 @@ public class CommandInit implements Callable<Integer> {
 			env.err.println("Directory is already initialised for ADR.");
 			return ADR.ERRORGENERAL;
 		}
-		
+
 		// Check that any template file specified really exists
 		if (template != null) {
 			Path templatePath = env.fileSystem.getPath(template);
@@ -89,8 +82,8 @@ public class CommandInit implements Callable<Integer> {
 				return CommandLine.ExitCode.USAGE;
 			}
 		}
-		
-		// Check that any initial template file specifed really exists 
+
+		// Check that any initial template file specifed really exists
 		if (initialTemplate != null) {
 			Path initialTemplatePath = env.fileSystem.getPath(initialTemplate);
 			if (!Files.exists(initialTemplatePath)) {
@@ -118,17 +111,17 @@ public class CommandInit implements Callable<Integer> {
 
 
 		// If no template is specified and no initial template is specified create
-		// an initial ADR using the default (Nygard) form 
+		// an initial ADR using the default (Nygard) form
 		if (template == null && initialTemplate == null) {
 			Record record = new Record.Builder(docsPath)
 					.template("rsrc:" + ADRProperties.defaultInitialTemplateName)
 					.id(1)
 					.name("Record architecture decisions")
 					.date(new Date())
-					.build(); 
-			record.store(); 
+					.build();
+			record.store();
 		}
-		
+
 		// If a template is specified and an initial template is specified create an
 		// initial ADR using the specified initial template
 		if (template != null && initialTemplate != null) {
@@ -137,10 +130,10 @@ public class CommandInit implements Callable<Integer> {
 					.id(1)
 					.name("Record architecture decisions")
 					.date(new Date())
-					.build(); 
+					.build();
 			record.store();
 		}
-		
+
 		// If an initial template is specified, but no template give error message
 		if (template == null && initialTemplate != null) {
 			env.err.println("ERROR: Initial template [INITIALTEMPLATE] spceified, but no template [TEMPLATE]specified.  "
@@ -148,7 +141,7 @@ public class CommandInit implements Callable<Integer> {
 			env.err.println();
 			exitCode = CommandLine.ExitCode.USAGE;
 		}
-		
+
 
 		return exitCode;
 	}
